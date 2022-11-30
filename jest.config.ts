@@ -1,5 +1,5 @@
-import { pathsToModuleNameMapper } from  "ts-jest/utils";
-const { compilerOptions } = require("./tsconfig");
+import { pathsToModuleNameMapper } from 'ts-jest/utils';
+const { compilerOptions } = require('./tsconfig');
 
 export default {
   roots: ['<rootDir>/app', '<rootDir>/test/jest'],
@@ -9,5 +9,7 @@ export default {
   transform: {
     '^.+\\.tsx?$': 'ts-jest',
   },
-  moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, { prefix: '<rootDir>/' } ),
+  moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, {
+    prefix: '<rootDir>/',
+  }),
 };

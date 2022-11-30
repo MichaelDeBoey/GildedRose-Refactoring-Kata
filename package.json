@@ -5,6 +5,7 @@
   "scripts": {
     "precompile": "rimraf app/**/*.js test/**/*.js",
     "compile": "tsc",
+    "format": "prettier -w .",
     "pretest": "rimraf app/**/*.js test/**/*.js",
     "test:jest": "jest",
     "test:jest:watch": "jest --watchAll"
@@ -16,6 +17,7 @@
     "@types/node": "^16.18.4",
     "jest": "^27.5.1",
     "nyc": "~15.1.0",
+    "prettier": "2.8.0",
     "rimraf": "~3.0.2",
     "source-map-support": "^0.5.21",
     "ts-jest": "^27.1.5",

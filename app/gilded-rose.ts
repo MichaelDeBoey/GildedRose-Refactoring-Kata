@@ -10,68 +10,69 @@ export class Item {
   }
 }
 
+const MAX_QUALITY = 50;
+const MIN_QUALITY = 0;
+
 export class GildedRose {
   items: Array<Item>;
 
-  constructor(items = [] as Array<Item>) {
+  public constructor(items = [] as Array<Item>) {
     this.items = items;
   }
 
-  updateQuality() {
-    for (let i = 0; i < this.items.length; i++) {
-      if (
-        this.items[i].name != 'Aged Brie' &&
-        this.items[i].name != 'Backstage passes to a TAFKAL80ETC concert'
-      ) {
-        if (this.items[i].quality > 0) {
-          if (this.items[i].name != 'Sulfuras, Hand of Ragnaros') {
-            this.items[i].quality = this.items[i].quality - 1;
-          }
-        }
-      } else {
-        if (this.items[i].quality < 50) {
-          this.items[i].quality = this.items[i].quality + 1;
-          if (
-            this.items[i].name == 'Backstage passes to a TAFKAL80ETC concert'
-          ) {
-            if (this.items[i].sellIn < 11) {
-              if (this.items[i].quality < 50) {
-                this.items[i].quality = this.items[i].quality + 1;
-              }
-            }
-            if (this.items[i].sellIn < 6) {
-              if (this.items[i].quality < 50) {
-                this.items[i].quality = this.items[i].quality + 1;
-              }
-            }
-          }
-        }
-      }
-      if (this.items[i].name != 'Sulfuras, Hand of Ragnaros') {
-        this.items[i].sellIn = this.items[i].sellIn - 1;
-      }
-      if (this.items[i].sellIn < 0) {
-        if (this.items[i].name != 'Aged Brie') {
-          if (
-            this.items[i].name != 'Backstage passes to a TAFKAL80ETC concert'
-          ) {
-            if (this.items[i].quality > 0) {
-              if (this.items[i].name != 'Sulfuras, Hand of Ragnaros') {
-                this.items[i].quality = this.items[i].quality - 1;
-              }
-            }
-          } else {
-            this.items[i].quality =
-              this.items[i].quality - this.items[i].quality;
-          }
-        } else {
-          if (this.items[i].quality < 50) {
-            this.items[i].quality = this.items[i].quality + 1;
-          }
-        }
-      }
-    }
+  public updateQuality = () => {
+    this.items = this.items.map<Item>((item) => {
+      const updatedItem = this.updateItem(item);
+
+      return {
+        ...updatedItem,
+        quality:
+          updatedItem.quality < MIN_QUALITY ? MIN_QUALITY : updatedItem.quality,
+      };
+    });
 
     return this.items;
-  }
+  };
+
+  private updateAgedBrie = ({ name, quality, sellIn }: Item): Item => {
+    const newQuality = quality + 1;
+
+    return {
+      name,
+      quality: newQuality > MAX_QUALITY ? MAX_QUALITY : newQuality,
+      sellIn: sellIn - 1,
+    };
+  };
+
+  private updateBackstagePass = ({ name, quality, sellIn }: Item): Item => {
+    const qualityToAdd =
+      sellIn > 10 ? 1 : sellIn > 5 ? 2 : sellIn > 0 ? 3 : -quality;
+    const newQuality = quality + qualityToAdd;
+
+    return {
+      name,
+      quality: newQuality > MAX_QUALITY ? MAX_QUALITY : newQuality,
+      sellIn: sellIn - 1,
+    };
+  };
+
+  private updateCommonItem = ({ name, quality, sellIn }: Item): Item => ({
+    name,
+    quality: quality - (sellIn > 0 ? 1 : 2),
+    sellIn: sellIn - 1,
+  });
+
+  private updateItem = (item: Item): Item => {
+    const updateFunctionByName = {
+      'Aged Brie': this.updateAgedBrie,
+      'Backstage passes to a TAFKAL80ETC concert': this.updateBackstagePass,
+      'Sulfuras, Hand of Ragnaros': this.updateSulfuras,
+    };
+    const updateFunction =
+      updateFunctionByName[item.name] || this.updateCommonItem;
+
+    return updateFunction(item);
+  };
+
+  private updateSulfuras = (item: Item): Item => item;
 }

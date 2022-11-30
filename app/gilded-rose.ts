@@ -20,6 +20,9 @@ export class GildedRose {
     this.items = items;
   }
 
+  private getDegradeQualityMultiplier = (isConjured: boolean) =>
+    isConjured ? 2 : 1;
+
   public updateQuality = () => {
     this.items = this.items.map<Item>((item) => {
       const updatedItem = this.updateItem(item);
@@ -56,11 +59,19 @@ export class GildedRose {
     };
   };
 
-  private updateCommonItem = ({ name, quality, sellIn }: Item): Item => ({
-    name,
-    quality: quality - (sellIn > 0 ? 1 : 2),
-    sellIn: sellIn - 1,
-  });
+  private updateCommonItem = (
+    { name, quality, sellIn }: Item,
+    isConjured: boolean
+  ): Item => {
+    const qualityToSubtract =
+      (sellIn > 0 ? 1 : 2) * this.getDegradeQualityMultiplier(isConjured);
+
+    return {
+      name,
+      quality: quality - qualityToSubtract,
+      sellIn: sellIn - 1,
+    };
+  };
 
   private updateItem = (item: Item): Item => {
     const updateFunctionByName = {
@@ -68,10 +79,14 @@ export class GildedRose {
       'Backstage passes to a TAFKAL80ETC concert': this.updateBackstagePass,
       'Sulfuras, Hand of Ragnaros': this.updateSulfuras,
     };
+    const isConjured = item.name.startsWith('Conjured ');
+    const normalizedName = isConjured
+      ? item.name.replace('Conjured ', '')
+      : item.name;
     const updateFunction =
-      updateFunctionByName[item.name] || this.updateCommonItem;
+      updateFunctionByName[normalizedName] || this.updateCommonItem;
 
-    return updateFunction(item);
+    return updateFunction(item, isConjured);
   };
 
   private updateSulfuras = (item: Item): Item => item;
